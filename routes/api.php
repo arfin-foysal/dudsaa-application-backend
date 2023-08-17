@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\NoticeController;
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'registerUser']);
@@ -31,6 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
 //Mobile Routes
     Route::group(['prefix' => 'mobile'], function () {
         Route::get('event-list', [EventController::class, 'eventList']);
+        Route::get('event-details/{id}', [EventController::class, 'eventDetails']);
+        Route::get('notice-list', [NoticeController::class, 'noticeList']);
+        Route::get('notice-details/{id}', [NoticeController::class, 'noticeDetails']);
     });
     //Website Routes
     Route::group(['prefix' => 'website'], function () {
