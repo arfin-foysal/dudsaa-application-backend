@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOptionsTable extends Migration
+class CreatePollOptionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,10 @@ class CreateOptionsTable extends Migration
      */
     public function up()
     {
-        //poll_options
-        Schema::create('options', function (Blueprint $table) {
+        Schema::create('poll_options', function (Blueprint $table) {
             $table->id();
             $table->bigInteger("polls_id"); 
             $table->string("option"); 
-            // Poll_id = 1
-            // 1. Option A(4) 
-            // 2. Option B(3) 
-            // 3. Option C(15)
             $table->bigInteger("votes")->default(0);
             $table->timestamps();
         });
@@ -34,6 +29,6 @@ class CreateOptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('options');
+        Schema::dropIfExists('poll_options');
     }
 }

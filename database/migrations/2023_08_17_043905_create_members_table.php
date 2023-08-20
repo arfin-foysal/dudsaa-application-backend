@@ -30,10 +30,13 @@ class CreateMembersTable extends Migration
             $table->date('date_of_birth')->nullable();
             $table->text('current_address')->nullable();
             $table->text('permanent_address')->nullable();
-            $table->bigInteger('division_id')->nullable();
-            $table->bigInteger('district_id')->nullable();
+            $table->bigInteger('country_id')->nullable();
+            $table->bigInteger('state_id')->nullable();
             $table->bigInteger('city_id')->nullable();
-            $table->bigInteger('area_id')->nullable();
+            // $table->bigInteger('division_id')->nullable();
+            // $table->bigInteger('district_id')->nullable();
+            // $table->bigInteger('city_id')->nullable();
+            // $table->bigInteger('area_id')->nullable();
             $table->string('nid_no')->nullable();
             $table->string('birth_certificate_no')->nullable();
             $table->string('passport_no')->nullable();

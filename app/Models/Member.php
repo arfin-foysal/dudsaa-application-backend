@@ -24,10 +24,9 @@ class Member extends Model
         'date_of_birth',
         'current_address',
         'permanent_address',
-        'division_id',
-        'district_id',
+        'country_id',
+        'state_id',
         'city_id',
-        'area_id',
         'nid_no',
         'birth_certificate_no',
         'passport_no',
@@ -38,11 +37,17 @@ class Member extends Model
         'department',
         'institute_id',
         'batch_no',
+        'facebook',
+        'linkedin',
+        'twitter',
+        'instagram',
         'status',
         'is_active',
     ];
     protected $casts = [
+        'is_active' => 'boolean',
+        'interested_to_donate' => 'boolean',
 
-        'is_active' => 'boolean'
+       
     ];
 }

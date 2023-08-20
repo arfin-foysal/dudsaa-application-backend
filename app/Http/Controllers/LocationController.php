@@ -2,14 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\HelperTrait;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\District;
 use App\Models\Division;
+use App\Models\State;
 use App\Models\Union;
 use App\Models\Upazila;
 use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
+use HelperTrait;
+    public function countryList(Request $request)
+    {
+        //$user_id = $request->user()->id;
+
+        $country = Country::select('id', 'name')->get();
+
+        return $this->apiResponse($country, 'Country List', true, 200);
+    }
+
     public function divisionList(Request $request)
     {
         //$user_id = $request->user()->id;
@@ -23,39 +37,29 @@ class LocationController extends Controller
         ], 200);
     }
 
-    public function districtListByID(Request $request)
+  
+    public function stateListByID(Request $request)
     {
-        $division_id = $request->division_id? $request->division_id : 0;
-        $district = District::where('division_id', $division_id)->get();
+        $country = $request->country_id? $request->country_id : 0;
+        $state = State::where('country_id', $country)
+            ->select('id', 'name','country_id')
+            ->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => "Successful",
-            'data' => $district
-        ], 200);
+        return $this->apiResponse($state, 'State List', true, 200);
     }
 
-    public function upazilaListByID(Request $request)
+    public function cityListByID(Request $request)
     {
-        $district_id = $request->district_id? $request->district_id : 0;
-        $upazila = Upazila::where('district_id', $district_id)->get();
+        $state = $request->state_id? $request->state_id : 0;
+        $city = City::where('state_id', $state)
+            ->select('id', 'name','state_id')
+            ->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => "Successful",
-            'data' => $upazila
-        ], 200);
+        return $this->apiResponse($city, 'City List', true, 200);
     }
 
-    public function unionListByID(Request $request)
-    {
-        $upazilla_id = $request->upazilla_id? $request->upazilla_id : 0;
-        $union = Union::where('upazilla_id', $upazilla_id)->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => "Successful",
-            'data' => $union
-        ], 200);
-    }
+
+  
+
 }

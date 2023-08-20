@@ -21,7 +21,7 @@ class CreateEducationInformationsTable extends Migration
             $table->string('passing_year')->nullable();
             $table->string('result')->nullable();
             $table->enum('status', ['Completed', 'Ongoing', 'OnHold'])->default('Ongoing');
-            $table->boolean('is_Active')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

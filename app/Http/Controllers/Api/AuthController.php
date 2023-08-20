@@ -31,7 +31,7 @@ class AuthController extends Controller
                     'contact_no' => 'required|unique:users',
                     'password' => 'required',
                     'gender' => 'required',
-                    'batch_no'=> 'required',
+                    'batch_no' => 'required',
                 ]
             );
 
@@ -53,7 +53,7 @@ class AuthController extends Controller
                 }
             }
 
-        
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -68,19 +68,20 @@ class AuthController extends Controller
                     'image' => $this->imageUpload($request, 'image', 'profile'),
                 ]);
             }
-           
+
             Member::create([
                 'user_id' => $user->id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'contact_no' => $request->contact_no,
                 'address' => $request->address,
-                'gender'=>$request->gender,
-                'date_of_birth'=>$request->date_of_birth,
-                'batch_no'=>$request->batch_no,
+                'gender' => $request->gender,
+                'date_of_birth' => $request->date_of_birth,
+                'batch_no' => $request->batch_no,
+                'status' => "Active",
                 'is_active' => true
             ]);
-        
+
             $response_user = [
                 'name' => $user->name,
                 'user_type' => $request->user_type ? $request->user_type : "Member",
@@ -136,14 +137,7 @@ class AuthController extends Controller
         }
     }
 
-    public function profileDetailsByID($user_id)
-    {
-        $user = User::select('users.*', 'countries.country_name')->where('users.id', $user_id)
-            ->leftJoin('countries', 'countries.id', 'users.country_id')
-            ->first();
 
-        return $user;
-    }
 
     public function saveOrUpdateUser(Request $request)
     {
@@ -222,111 +216,85 @@ class AuthController extends Controller
 
     public function updateUser(Request $request)
     {
-        $user_id = $request->user()->id;
         try {
-            if (!$request->name && !$request->contact_no && !$request->country_id && !$request->address && !$request->institution && !$request->education && !$request->hasFile('image')) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Please, attach information!',
-                    'data' => []
-                ], 200);
+            $user = User::where('id', $request->user()->id)->first();
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'email' => 'required|email|unique:users,email,' . $user->id,
+                    'contact_no' => 'required|unique:users,contact_no,' . $user->id,
+                ]
+            );
+
+            if ($validateUser->fails()) {
+                return $this->apiResponse($validateUser->errors(), 'validation error', false, 422);
             }
 
-            $profile_image = null;
-            $profile_url = null;
             if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $time = time();
-                $profile_image = "profile_image_" . $time . '.' . $image->getClientOriginalExtension();
-                $destinationProfile = 'uploads/profile';
-                $image->move($destinationProfile, $profile_image);
-                $profile_url = $destinationProfile . '/' . $profile_image;
+                $user->update([
+                    'image' => $this->imageUpload($request, 'image', 'profile'),
+                ]);
             }
 
-            $user = User::create([
+            $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'contact_no' => $request->contact_no,
-                'address' => $request->address,
+                'address' => $request->current_address,
             ]);
 
-            if ($request->name) {
-                User::where('id', $user_id)->update([
-                    'name' => $request->name
-                ]);
-            }
-
-            if ($request->contact_no) {
-                User::where('id', $user_id)->update([
-                    'contact_no' => $request->contact_no
-                ]);
-            }
-
-            if ($request->country_id) {
-                User::where('id', $user_id)->update([
-                    'country_id' => $request->country_id
-                ]);
-            }
-
-            if ($request->address) {
-                User::where('id', $user_id)->update([
-                    'address' => $request->address
-                ]);
-            }
-
-            if ($request->institution) {
-                User::where('id', $user_id)->update([
-                    'institution' => $request->institution
-                ]);
-            }
-
-            if ($request->education) {
-                User::where('id', $user_id)->update([
-                    'education' => $request->education
-                ]);
-            }
-
-            // User::where('id', $user_id)->update([
-            //     'name' => $request->name,
-            //     'contact_no' => $request->contact_no,
-            //     'country_id' => $request->country_id,
-            //     'address' => $request->address,
-            //     'institution' => $request->institution,
-            //     'education' => $request->education
-            // ]);
-
-            if ($request->hasFile('image')) {
-                User::where('id', $user_id)->update([
-                    'image' => $profile_url
-                ]);
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Updated Successful',
-                'data' => $this->profileDetailsByID($user_id)
-            ], 200);
+            $member = Member::where('user_id', $request->user()->id)->first();
+            $member->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'contact_no' => $request->contact_no,
+                'alternative_contact_no' => $request->alternative_contact_no,
+                'gender' => $request->gender,
+                'blood_group' => $request->blood_group,
+                'bio' => $request->bio,
+                'father_name' => $request->father_name,
+                'mother_name' => $request->mother_name,
+                'religion' => $request->religion,
+                'marital_status' => $request->marital_status,
+                'date_of_birth' => $request->date_of_birth,
+                'current_address' => $request->current_address,
+                'permanent_address' => $request->permanent_address,
+                'country_id' => $request->country_id,
+                'state_id' => $request->state_id,
+                'city_id' => $request->city_id,
+                'nid_no' => $request->nid_no,
+                'image' => $user->image,
+                'birth_certificate_no' => $request->birth_certificate_no,
+                'passport_no' => $request->passport_no,
+                'last_blood_donation_date' => $request->last_blood_donation_date,
+                'batch_no' => $request->batch_no,
+                'department' => $request->department,
+                'student_id_no' => $request->student_id_no,
+                'institute_id_no' => $request->institute_id_no,
+                'batch_no' => $request->batch_no,
+                'status' => $request->status,
+                'facebook' => $request->facebook,
+                'linkedin' => $request->linkedin,
+                'twitter' => $request->twitter,
+                'instagram' => $request->instagram,
+            ]);
+            return $this->apiResponse([], 'Update successfully', true, 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'data' => []
-            ], 500);
+            return $this->apiResponse([], $th->getMessage(), false, 500);
         }
     }
 
     public function getProfile(Request $request)
     {
-        $user_id = $request->user()->id;
-        $user = User::select('users.*', 'countries.country_name')->where('users.id', $user_id)
-            ->leftJoin('countries', 'countries.id', 'users.country_id')
+        $user = Member::where('user_id', auth()->user()->id)
+            ->leftJoin('users', 'users.id', '=', 'members.user_id')
+            ->leftJoin('countries', 'countries.id', '=', 'members.country_id')
+            ->leftJoin('states', 'states.id', '=', 'members.state_id')
+            ->leftJoin('cities', 'cities.id', '=', 'members.city_id')
+            ->select('members.*', 'users.image as image', 'countries.name as country_name', 'states.name as state_name', 'cities.name as city_name')
             ->first();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Successful',
-            'data' => $user
-        ], 200);
+        return $this->apiResponse($user, 'User Profile', true, 200);
     }
 
 

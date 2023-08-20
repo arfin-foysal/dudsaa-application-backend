@@ -18,8 +18,8 @@ class CreateServiceInformationsTable extends Migration
             $table->bigInteger('member_id');
             $table->string('designation');
             $table->string('organization');
-            $table->dateTime('Start_date');
-            $table->dateTime('End_date')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
             $table->boolean('is_continue')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
