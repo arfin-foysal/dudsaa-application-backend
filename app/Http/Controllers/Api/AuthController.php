@@ -79,7 +79,7 @@ class AuthController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'batch_no' => $request->batch_no,
                 'status' => "Active",
-                'is_active' => true
+                'is_active' => false
             ]);
 
             $response_user = [
@@ -130,14 +130,11 @@ class AuthController extends Controller
                 'updated_at' => $user->updated_at,
                 'token' => $user->createToken("API TOKEN")->plainTextToken
             ];
-
             return $this->apiResponse($response_user, 'User has been logged in successfully', true, 200);
         } catch (\Throwable $th) {
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
     }
-
-
 
     public function saveOrUpdateUser(Request $request)
     {
@@ -211,8 +208,6 @@ class AuthController extends Controller
             return $this->apiResponse([], $e->getMessage(), false, 500);
         }
     }
-
-
 
     public function updateUser(Request $request)
     {

@@ -36,14 +36,41 @@ class BloodController extends Controller
         }
     }
 
+
     public function bloodRequestList(Request $request)
     {
         $blood = BloodRequest::where('needed_within_date', '>=', date('Y-m-d'))
             ->leftJoin('users', 'users.id', '=', 'blood_requests.user_id')
-            ->select('blood_requests.*', 'users.name as user_name')
+            ->leftJoin('members', 'members.user_id', '=', 'blood_requests.user_id')
+            ->select('blood_requests.*', 
+            'members.name as user_name',
+            'members.image as image',
+            'members.batch_no as user_batch_no',
+            'members.contact_no as contact_no',
+
+            )
             ->get();
         return $this->apiResponse($blood, 'Blood Request List', true, 200);
     }
+
+
+    public function bloodRequestDetails($id)
+    {
+        $blood = BloodRequest::where('blood_requests.id', $id)
+            ->leftJoin('users', 'users.id', '=', 'blood_requests.user_id')
+            ->leftJoin('members', 'members.user_id', '=', 'blood_requests.user_id')
+            ->select('blood_requests.*', 
+            'members.name as user_name',
+            'members.image as image',
+            'members.batch_no as user_batch_no',
+            'members.contact_no as contact_no',
+            )
+            ->first();
+        return $this->apiResponse($blood, 'Blood Request Details', true, 200);
+    }
+
+
+
 
     public function alumniListByBloodGroup(Request $request)
     {

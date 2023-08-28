@@ -20,29 +20,114 @@ class EventController extends Controller
         return $this->apiResponse($event, 'Event List', true, 200);
     }
 
-
     public function eventDetails($id)
     {
         $event = EventPhoto::leftJoin('events', 'event_photos.event_id', 'events.id')
             ->leftJoin('users', 'events.created_by', 'users.id')
             ->select(
                 'event_photos.*',
-                'events.title',
-                'events.description',
-                'events.venue',
-                'events.event_date',
-                'events.created_by',
-                'users.name as publisher_name'
             )
             ->where('event_photos.event_id', $id)
             ->latest()
             ->get();
-        return $this->apiResponse($event, 'Event Details', true, 200);
+        $eventName = Event::where('id', $id)->first();
+
+        $data = [
+            'event' => $event,
+            'event_name' => $eventName->title,
+            'event_description' => $eventName->description
+        ];
+        return $this->apiResponse($data, 'Event Details', true, 200);
     }
 
-    public function eventSaveOrUpdate()
+    public function eventSaveOrUpdate(Request $request)
+    {
+        try {
+            $event = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'venue' => $request->venue,
+                'event_date' => $request->event_date,
+                'is_active' => $request->is_active,
+            ];
+            if (empty($request->id)) {
+                $events = Event::create($event);
+                $events->update([
+                    'created_by' => auth()->user()->id,
+                ]);
+                if ($request->hasFile('banner_image')) {
+                    $events->update([
+                        'banner_image' => $this->imageUpload($request, 'banner_image', 'event'),
+                    ]);
+                }
+                return $this->apiResponse([], 'Event Created', true, 200);
+            } else {
+                $updateJobs= Event::where('id', $request->id)->first();
+                $updateJobs->update($event);
+                 if ($request->hasFile('banner_image')) {
+                     $updateJobs->update([
+                         'banner_image' => $this->imageUpload($request, 'banner_image', 'event', $updateJobs->banner_image),
+                     ]);
+                 }
+                return $this->apiResponse([], 'Event Updated', true, 200);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->apiResponse([], $th->getMessage(), false, 500);
+        }
+    }
+
+    public function eventPhotoList(Request $request, $id)
     {
 
+        $event = EventPhoto::where('event_id', $id)
+            ->leftJoin('events', 'event_photos.event_id', 'events.id')
+            ->leftJoin('users', 'events.created_by', 'users.id')
+            ->select(
+                'event_photos.*',
+            )
+            ->latest()
+            ->get();
+        return $this->apiResponse($event, 'Event Photo List', true, 200);
     }
 
+
+    public function eventPhotoSaveOrUpdate(Request $request)
+    {
+        try {
+            $event = [
+                'event_id' => $request->event_id,
+                'image' => $request->image,
+                'is_active' => $request->is_active,
+                'caption' => $request->caption,
+                'alt_text' => $request->alt_text,
+
+            ];
+            if (empty($request->id)) {
+                $eventPhoto = [];
+                $event_photo = json_decode($request->event_photo, true);
+                foreach ($event_photo as $key => $value) {
+                    $eventPhoto[] = [
+                        'event_id' => $request->event_id,
+                        'image' => $this->imageUpload($value, 'image', 'event'),
+                        'is_active' => $request->is_active,
+                        'caption' => $request->caption,
+                        'alt_text' => $request->alt_text,
+                    ];
+                }
+                EventPhoto::insert($eventPhoto);
+                return $this->apiResponse([], 'Event Photo Created', true, 200);
+            } else {
+                $photo = EventPhoto::where('id', $request->id)->first();
+                if ($request->image) {
+                    $event['image'] = $this->imageUpload($request, 'image', 'event', $photo->image);
+                }
+                $photo->update($event);
+
+                return $this->apiResponse([], 'Event Photo Updated', true, 200);
+            }
+        } catch (\Throwable $th) {
+            return $this->apiResponse([], $th->getMessage(), false, 500);
+        }
+    }
 }

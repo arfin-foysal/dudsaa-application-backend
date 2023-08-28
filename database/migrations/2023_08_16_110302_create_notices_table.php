@@ -18,7 +18,7 @@ class CreateNoticesTable extends Migration
             $table->string('title');
             $table->longText('body');
             $table->bigInteger('published_by')->comment('user_id');
-            $table->boolean('is_active')->default(0);
+            $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
     }

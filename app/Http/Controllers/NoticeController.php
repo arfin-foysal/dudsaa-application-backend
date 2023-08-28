@@ -25,6 +25,7 @@ class NoticeController extends Controller
                 'notices.id',
                 'notices.published_by',
                 'notices.title',
+                'notices.body',
                 'notices.is_active',
                 'notices.created_at',
                 'users.name as publisher_name'
@@ -62,7 +63,6 @@ class NoticeController extends Controller
                 [
                     'title' => 'required',
                     'body'=>'required',
-                    'published_by'=>'required',
                 ]
             );
 
@@ -74,7 +74,7 @@ class NoticeController extends Controller
                 'title' => $request->title,
                 'body' => $request->body,
                 'published_by' => Auth::user()->id,
-                'is_active' => $request->is_active,
+                'is_active' => true,
                 'created_at' => Carbon::now(),
             ];
 

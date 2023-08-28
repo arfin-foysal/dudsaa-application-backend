@@ -69,15 +69,11 @@ class PollController extends Controller
     }
 
 
-
-
-
     public function pollSaveOrUpdate(Request $request)
     {
         try {
             $request->validate([
                 'title' => 'required',
-                'description' => 'required',
                 'end_date' => 'required',
             ]);
 
@@ -90,21 +86,29 @@ class PollController extends Controller
                     'status' => $request->status,
                     'is_active' => $request->is_active,
                 ]);
-                PollOption::where('polls_id', $request->id)->delete();
+
                 $option_data = json_decode($request->option, true);
-                $opt = [];
+
                 foreach ($option_data as $option) {
-                    $opt[] = [
-                        'polls_id' => $poll->id,
-                        'option' => $option,
-                    ];
+                    if (isset($option['id'])) {
+                        $opt = PollOption::where('id', $option['id'])->first();
+                        $opt->update([
+                            'option' => $option['option'],
+                        ]);
+                    } else {
+                        $opt = PollOption::create([
+                            'polls_id' => $poll->id,
+                            'option' => $option['option'],
+                        ]);
+                    }
                 }
-                PollOption::insert($opt);
+
                 return $this->apiResponse([], 'Poll Updated', true, 200);
             } else {
                 $poll = Poll::create([
                     'title' => $request->title,
                     'description' => $request->description,
+                    'start_date' => date('Y-m-d'),
                     'end_date' => $request->end_date,
                     'created_by' => auth()->user()->id,
                     'status' => $request->status,
@@ -130,13 +134,11 @@ class PollController extends Controller
     {
         try {
             $request->validate([
-                'polls_id' => 'required',
                 'option' => 'required',
             ]);
             if ($request->id) {
                 $option = PollOption::where('id', $request->id)->first();
                 $option->update([
-                    'polls_id' => $request->polls_id,
                     'option' => $request->option,
                 ]);
                 return $this->apiResponse([], 'Poll Option Updated', true, 200);
@@ -158,26 +160,32 @@ class PollController extends Controller
         }
     }
 
-    public function pollOptionDelete($id)
+    public function pollOptionDelete(Request $request, $id)
     {
         try {
-            PollOption::where('id', $id)->delete();
+            $option = PollOption::where('id', $id)->first();
+            $option->delete();
             return $this->apiResponse([], 'Poll Option Deleted', true, 200);
         } catch (\Throwable $th) {
             return $this->apiResponse(null, $th->getMessage(), false, 500);
         }
     }
 
-
-    public function pollList(){
-        $polls = Poll::where('created_by',auth()->user()->id)->get();
+    public function pollList()
+    {
+        $polls = Poll::where('created_by', auth()->user()->id)
+            ->get();
+        foreach ($polls as $poll) {
+            $poll->options = PollOption::where('polls_id', $poll->id)
+                ->get();
+        }
         return $this->apiResponse($polls, 'Poll List', true, 200);
     }
-    
-    public function pollDetails($id){
-        $poll = Poll::where('id',$id)->first();
-        $poll->options = PollOption::where('polls_id',$poll->id)->get();
+
+    public function pollDetails($id)
+    {
+        $poll = Poll::where('id', $id)->first();
+        $poll->options = PollOption::where('polls_id', $poll->id)->get();
         return $this->apiResponse($poll, 'Poll Details', true, 200);
     }
-
 }

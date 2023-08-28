@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class EventPhoto extends Model
 {
     use HasFactory;
+
+
+    protected $fillable = [
+        'event_id',
+        'image',
+        'status',
+        'is_active',
+        'alt_text',
+        'caption',
+    ];
 }

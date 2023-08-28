@@ -14,15 +14,15 @@ class MemberController extends Controller
     use HelperTrait;
     public function alumniList(Request $request)
     {
-        $name = $request->query('name');
-        $batch = $request->query('batch');
-        $department = $request->query('department');
-        $country = $request->query('country');
-        $state = $request->query('state');
-        $city = $request->query('city');
+        $name = $request->name;
+        $batch = $request->batch;
+        $department = $request->department;
+        $country = $request->country;
+        $state = $request->state;
+        $city = $request->city;
 
-
-        $alumni = Member::where('status', 'Active')
+        $alumni = Member::where('members.status', 'Active')
+            ->where('members.is_active', 1)
             ->leftJoin('users', 'users.id', '=', 'members.user_id')
             ->leftJoin('countries', 'countries.id', '=', 'members.country_id')
             ->leftJoin('states', 'states.id', '=', 'members.state_id')
@@ -66,7 +66,6 @@ class MemberController extends Controller
                 'cities.name as city_name',
                 'users.image as user_image',
             )
-
             ->get();
 
         return $this->apiResponse($alumni, 'Alumni List', true, 200);
@@ -139,7 +138,7 @@ class MemberController extends Controller
             ->get();
         return $this->apiResponse($education, 'Education List', true, 200);
     }
-    public function educationListById(Request $request,$id)
+    public function educationListById(Request $request, $id)
     {
         $education = Education_information::where('member_id', auth()->user()->id)
             ->where('id', $id)
@@ -183,14 +182,11 @@ class MemberController extends Controller
             ->get();
         return $this->apiResponse($education, 'Education List', true, 200);
     }
-    public function serviceListById(Request $request,$id)
+    public function serviceListById(Request $request, $id)
     {
         $education = Service_information::where('member_id', auth()->user()->id)
             ->where('id', $id)
             ->get();
         return $this->apiResponse($education, 'Education List', true, 200);
     }
-
-    
-
 }
