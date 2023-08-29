@@ -70,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Admin Routes
     Route::group(['prefix' => 'admin'], function () {
         Route::get('user-list', [UserController::class, 'userList']);
+        Route::get('user-list-admin/{id}', [UserController::class, 'userListAdmin']);
         Route::post('reset-password', [UserController::class, 'resetPassword']);
         Route::post('user-save-or-update', [UserController::class, 'userSaveOrCreate']);
         Route::post('notice-save-or-update', [NoticeController::class, 'noticeSaveOrUpdate']);
@@ -83,6 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('poll-option-delete/{id}', [PollController::class, 'pollOptionDelete']);
         Route::get('event-list', [EventController::class, 'eventList']);
         Route::post('event-save-or-update', [EventController::class, 'eventSaveOrUpdate']);
+        Route::post('event-photo-save-or-update', [EventController::class, 'eventPhotoSaveOrUpdate']);
+        Route::get('event-photo-list/{id}', [EventController::class, 'eventPhotoList']);
+        Route::delete('event-photo-delete/{id}', [EventController::class, 'eventPhotoDelete']);
     });
 });
 

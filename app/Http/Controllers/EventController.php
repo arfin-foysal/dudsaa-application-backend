@@ -88,7 +88,17 @@ class EventController extends Controller
             )
             ->latest()
             ->get();
-        return $this->apiResponse($event, 'Event Photo List', true, 200);
+
+            // event name
+            $eventName = Event::where('id', $id)->first();
+
+            $data = [
+                'event' => $event,
+                'event_name' => $eventName->title,
+            ];
+
+
+        return $this->apiResponse($data, 'Event Photo List', true, 200);
     }
 
 
@@ -97,25 +107,12 @@ class EventController extends Controller
         try {
             $event = [
                 'event_id' => $request->event_id,
-                'image' => $request->image,
                 'is_active' => $request->is_active,
-                'caption' => $request->caption,
-                'alt_text' => $request->alt_text,
-
             ];
+
             if (empty($request->id)) {
-                $eventPhoto = [];
-                $event_photo = json_decode($request->event_photo, true);
-                foreach ($event_photo as $key => $value) {
-                    $eventPhoto[] = [
-                        'event_id' => $request->event_id,
-                        'image' => $this->imageUpload($value, 'image', 'event'),
-                        'is_active' => $request->is_active,
-                        'caption' => $request->caption,
-                        'alt_text' => $request->alt_text,
-                    ];
-                }
-                EventPhoto::insert($eventPhoto);
+                $event['image'] = $this->imageUpload($request, 'image', 'event');
+                EventPhoto::create($event);
                 return $this->apiResponse([], 'Event Photo Created', true, 200);
             } else {
                 $photo = EventPhoto::where('id', $request->id)->first();
@@ -130,4 +127,18 @@ class EventController extends Controller
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
     }
+
+    public function eventPhotoDelete($id)
+    {
+        try {
+            $photo = EventPhoto::where('id', $id)->first();
+            $photo->delete();
+            return $this->apiResponse([], 'Event Photo Deleted', true, 200);
+        } catch (\Throwable $th) {
+            return $this->apiResponse([], $th->getMessage(), false, 500);
+        }
+    }
+
+
+
 }

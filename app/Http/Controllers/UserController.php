@@ -93,6 +93,8 @@ class UserController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'contact_no' => $request->contact_no,
+                    'user_type' => $request->user_type ? $request->user_type : "Member",
+                    'is_active' => $request->is_active,
                 ]);
 
                 if ($request->hasFile('image')) {
@@ -100,7 +102,12 @@ class UserController extends Controller
                         'image' => $this->imageUpload($request, 'image', 'profile'),
                     ]);
                 }
-                $member = Member::where('user_id', $request->id)->update($user);
+                $member = Member::where('user_id', $request->id)->first();
+                $member->update($user);
+                $member->update([
+                    'image' => $updateUser->image,
+                    'is_active' => $request->is_active,
+                ]);
                 return $this->apiResponse([], 'Member Updated', true, 200);
             }
         } catch (\Throwable $th) {
@@ -119,12 +126,29 @@ class UserController extends Controller
                 'members.date_of_birth',
                 'members.gender',
             )
-
-
             ->latest()
             ->get();
 
         return $this->apiResponse($user, 'User List', true, 200);
+    }
+    public function userListAdmin(Request $request,$id)
+    {
+        $user = Member::where('members.user_id', $id)
+        ->
+        leftJoin('users', 'users.id', '=', 'members.user_id')
+        ->leftJoin('countries', 'countries.id', '=', 'members.country_id')
+        ->leftJoin('states', 'states.id', '=', 'members.state_id')
+        ->leftJoin('cities', 'cities.id', '=', 'members.city_id')
+
+            ->select('members.*',
+            'countries.name as country_name',
+            'states.name as state_name',
+            'cities.name as city_name',
+            )
+
+            ->first();
+
+        return $this->apiResponse($user, 'Member List', true, 200);
     }
 
     public function userActiveInactive(Request $request)

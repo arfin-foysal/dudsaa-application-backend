@@ -61,6 +61,7 @@ class AuthController extends Controller
                 'address' => $request->address,
                 'user_type' => $request->user_type ? $request->user_type : "Member",
                 'password' => Hash::make($request->password),
+                'is_active' => 0,
             ]);
 
             if ($request->hasFile('image')) {
@@ -79,7 +80,7 @@ class AuthController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'batch_no' => $request->batch_no,
                 'status' => "Active",
-                'is_active' => false
+                'is_active' => 0
             ]);
 
             $response_user = [
