@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
-use HelperTrait;
+    use HelperTrait;
     public function countryList(Request $request)
     {
         $country = Country::select('id', 'name')->get();
@@ -20,9 +20,9 @@ use HelperTrait;
 
     public function stateListByID(Request $request)
     {
-        $country = $request->country_id? $request->country_id : 0;
+        $country = $request->country_id ? $request->country_id : 0;
         $state = State::where('country_id', $country)
-            ->select('id', 'name','country_id')
+            ->select('id', 'name', 'country_id')
             ->get();
 
         return $this->apiResponse($state, 'State List', true, 200);
@@ -30,9 +30,9 @@ use HelperTrait;
 
     public function cityListByID(Request $request)
     {
-        $state = $request->state_id? $request->state_id : 0;
+        $state = $request->state_id ? $request->state_id : 0;
         $city = City::where('state_id', $state)
-            ->select('id', 'name','state_id')
+            ->select('id', 'name', 'state_id')
             ->get();
 
         return $this->apiResponse($city, 'City List', true, 200);

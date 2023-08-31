@@ -14,12 +14,7 @@ class MemberController extends Controller
     use HelperTrait;
     public function alumniList(Request $request)
     {
-        $name = $request->name;
-        $batch = $request->batch;
-        $department = $request->department;
-        $country = $request->country;
-        $state = $request->state;
-        $city = $request->city;
+        $text = $request->query('text');
 
         $alumni = Member::where('members.status', 'Active')
             ->where('members.is_active', 1)
@@ -27,38 +22,13 @@ class MemberController extends Controller
             ->leftJoin('countries', 'countries.id', '=', 'members.country_id')
             ->leftJoin('states', 'states.id', '=', 'members.state_id')
             ->leftJoin('cities', 'cities.id', '=', 'members.city_id')
-
-            // like search
-            ->where(function ($query) use ($name) {
-                if ($name) {
-                    $query->where('members.name', 'like', '%' . $name . '%');
-                }
-            })
-            ->where(function ($query) use ($batch) {
-                if ($batch) {
-                    $query->where('members.batch_no', 'like', '%' . $batch . '%');
-                }
-            })
-            ->where(function ($query) use ($department) {
-                if ($department) {
-                    $query->where('members.department', 'like', '%' . $department . '%');
-                }
-            })
-            ->where(function ($query) use ($country) {
-                if ($country) {
-                    $query->where('countries.name', 'like', '%' . $country . '%');
-                }
-            })
-            ->where(function ($query) use ($state) {
-                if ($state) {
-                    $query->where('states.name', 'like', '%' . $state . '%');
-                }
-            })
-            ->where(function ($query) use ($city) {
-                if ($city) {
-                    $query->where('cities.name', 'like', '%' . $city . '%');
-                }
-            })
+            // like search member name department batch country state city
+            ->where('members.name', 'like', '%' . $text . '%')
+            ->orWhere('members.department', 'like', '%' . $text . '%')
+            ->orWhere('members.batch_no', 'like', '%' . $text . '%')
+            ->orWhere('countries.name', 'like', '%' . $text . '%')
+            ->orWhere('states.name', 'like', '%' . $text . '%')
+            ->orWhere('cities.name', 'like', '%' . $text . '%')
             ->select(
                 'members.*',
                 'countries.name as country_name',
@@ -83,7 +53,6 @@ class MemberController extends Controller
         return $this->apiResponse($alumni, 'Alumni Details', true, 200);
     }
 
-
     public function sameBatchAlumniList(Request $request)
     {
         $batch = auth()->user()->id;
@@ -99,7 +68,6 @@ class MemberController extends Controller
             ->get();
         return $this->apiResponse($alumni, 'Alumni List', true, 200);
     }
-
 
     public function educationSaveOrUpdate(Request $request)
     {

@@ -39,7 +39,6 @@ class JobController extends Controller
         return $this->apiResponse($job, 'Job Details', true, 200);
     }
 
-
     public function saveOrUpdateJob(Request $request)
     {
         try {
@@ -70,17 +69,15 @@ class JobController extends Controller
                         'image' => $this->imageUpload($request, 'image', 'profile'),
                     ]);
                 }
-
                 return $this->apiResponse([], 'Job Created', true, 200);
             } else {
-               $updateJobs= Job::where('id', $request->id)->first();
-               $updateJobs->update($jobs);
+                $updateJobs = Job::where('id', $request->id)->first();
+                $updateJobs->update($jobs);
                 if ($request->hasFile('image')) {
                     $updateJobs->update([
                         'image' => $this->imageUpload($request, 'image', 'profile', $updateJobs->image),
                     ]);
                 }
-
                 return $this->apiResponse([], 'Job Updated', true, 200);
             }
         } catch (\Exception $e) {

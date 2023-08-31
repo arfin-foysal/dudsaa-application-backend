@@ -299,17 +299,26 @@ class AuthController extends Controller
         $user_id = $request->user()->id;
 
         $user = User::where('id', $user_id)->first();
-
         User::where('id', $user_id)->update([
             "contact_no" => $user_id . "_deleted_" . $user->contact_no,
             "email" => $user_id . "_deleted_" . $user->email,
             "is_active" => false
         ]);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Account deleted successful',
-            'data' => []
-        ], 200);
+        return $this->apiResponse([], 'Account deleted successful', true, 200);
+    }
+
+
+    public function passwordChange(Request $request)
+    {
+        $user = User::where('id', $request->user()->id)->first();
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+            return $this->apiResponse([], 'Password Changed', true, 200);
+        } else {
+            return $this->apiResponse([], 'Old Password Not Matched', false, 422);
+        }
     }
 }

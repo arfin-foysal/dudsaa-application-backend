@@ -11,6 +11,30 @@ use Illuminate\Http\Request;
 class PollController extends Controller
 {
     use HelperTrait;
+    public function pollDetailsForVoting($id)
+    {
+        $polls = Poll::where([['status', 'Active'], ['end_date', '>=', date('Y-m-d')], ['polls.id', $id]])
+            ->leftJoin('votes', 'votes.polls_id', '=', 'polls.id')
+          ->select('polls.id as id', 'polls.title as title', 'polls.description as description', 'polls.start_date as start_date', 'polls.end_date as end_date', 'votes.option_id as option_id')
+            ->first();
+            // total vote count
+            $polls->total_vote = Vote::where('polls_id', $polls->id)->count();
+
+        $polls->options = PollOption::where('polls_id', $polls->id)
+            ->get();
+        // option is voted check
+        foreach ($polls->options as $option) {
+            $option->is_voted = false;
+            $option->is_voted = Vote::where([['polls_id', $polls->id], ['option_id', $option->id], ['user_id', auth()->user()->id]])->exists();
+            $option->vote_count = Vote::where([['polls_id', $polls->id], ['option_id', $option->id]])->count();
+            //vote % calculation
+            $totalVote = Vote::where([['polls_id', $polls->id]])->count();
+            $option->vote_percentage = ($option->vote_count / $totalVote) * 100;
+        }
+
+        return $this->apiResponse($polls, 'Poll Details', true, 200);
+    }
+
     public function votingList()
     {
         $polls = Poll::where([['status', 'Active'], ['end_date', '>=', date('Y-m-d')]])
@@ -68,7 +92,6 @@ class PollController extends Controller
         }
     }
 
-
     public function pollSaveOrUpdate(Request $request)
     {
         try {
@@ -84,7 +107,7 @@ class PollController extends Controller
                     'description' => $request->description,
                     'end_date' => $request->end_date,
                     'status' => $request->status,
-                    'is_active' => $request->is_active,
+                    'is_active' => $request->is_active ? $request->is_active : 1,
                 ]);
 
                 $option_data = json_decode($request->option, true);
@@ -112,7 +135,7 @@ class PollController extends Controller
                     'end_date' => $request->end_date,
                     'created_by' => auth()->user()->id,
                     'status' => $request->status,
-                    'is_active' => $request->is_active,
+                    'is_active' => $request->is_active ? $request->is_active : 1,
                 ]);
                 $option_data = json_decode($request->option, true);
                 $opt = [];
@@ -169,6 +192,18 @@ class PollController extends Controller
         } catch (\Throwable $th) {
             return $this->apiResponse(null, $th->getMessage(), false, 500);
         }
+    }
+
+    public function pollListForMobile()
+    {
+        $polls = Poll::where([['status', 'Active'], ['end_date', '>=', date('Y-m-d')]])
+        ->select('id', 'title', 'description', 'start_date', 'end_date')
+        ->get();
+        //total vote count
+        foreach ($polls as $poll) {
+            $poll->total_vote = Vote::where('polls_id', $poll->id)->count();
+        }
+        return $this->apiResponse($polls, 'Poll List', true, 200);
     }
 
     public function pollList()

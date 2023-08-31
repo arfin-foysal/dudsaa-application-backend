@@ -13,15 +13,13 @@ use Illuminate\Support\Facades\Validator;
 class NoticeController extends Controller
 {
     use HelperTrait;
-
     public function noticeList(Request $request)
     {
-
-        $month = $request->query('month')  ;
-        $year = $request->query('year') ;
+        $month = $request->query('month');
+        $year = $request->query('year');
 
         $notice = Notice::leftJoin('users', 'notices.published_by', 'users.id')
-        ->select(
+            ->select(
                 'notices.id',
                 'notices.published_by',
                 'notices.title',
@@ -29,10 +27,9 @@ class NoticeController extends Controller
                 'notices.is_active',
                 'notices.created_at',
                 'users.name as publisher_name'
-
             )
             ->when($month, function ($query, $month) {
-                return $query->whereMonth('notices.created_at',$month);
+                return $query->whereMonth('notices.created_at', $month);
             })
             ->when($year, function ($query, $year) {
                 return $query->whereYear('notices.created_at', $year);
@@ -62,7 +59,7 @@ class NoticeController extends Controller
                 $request->all(),
                 [
                     'title' => 'required',
-                    'body'=>'required',
+                    'body' => 'required',
                 ]
             );
 
@@ -78,14 +75,13 @@ class NoticeController extends Controller
                 'created_at' => Carbon::now(),
             ];
 
-            if(empty($request->id)){
+            if (empty($request->id)) {
                 Notice::insert($notice);
                 return $this->apiResponse([], 'Notice Created', true, 200);
-            }else{
-                Notice::where('id',$request->id)->update($notice);
+            } else {
+                Notice::where('id', $request->id)->update($notice);
                 return $this->apiResponse([], 'Notice Updated', true, 200);
             }
-
         } catch (\Throwable $th) {
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
@@ -94,11 +90,10 @@ class NoticeController extends Controller
     public function noticeDelete($id)
     {
         try {
-            Notice::where('id',$id)->delete();
+            Notice::where('id', $id)->delete();
             return $this->apiResponse([], 'Notice Deleted', true, 200);
         } catch (\Throwable $th) {
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
     }
-
 }

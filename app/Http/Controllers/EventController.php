@@ -6,8 +6,6 @@ use App\Http\Traits\HelperTrait;
 use App\Models\Event;
 use App\Models\EventPhoto;
 use Illuminate\Http\Request;
-
-
 class EventController extends Controller
 {
     use HelperTrait;
@@ -79,7 +77,6 @@ class EventController extends Controller
 
     public function eventPhotoList(Request $request, $id)
     {
-
         $event = EventPhoto::where('event_id', $id)
             ->leftJoin('events', 'event_photos.event_id', 'events.id')
             ->leftJoin('users', 'events.created_by', 'users.id')
@@ -88,19 +85,15 @@ class EventController extends Controller
             )
             ->latest()
             ->get();
-
             // event name
             $eventName = Event::where('id', $id)->first();
-
             $data = [
                 'event' => $event,
                 'event_name' => $eventName->title,
             ];
 
-
         return $this->apiResponse($data, 'Event Photo List', true, 200);
     }
-
 
     public function eventPhotoSaveOrUpdate(Request $request)
     {
@@ -138,7 +131,4 @@ class EventController extends Controller
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
     }
-
-
-
 }
