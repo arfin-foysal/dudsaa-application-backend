@@ -15,26 +15,25 @@ class MemberController extends Controller
     public function alumniList(Request $request)
     {
         $text = $request->query('text');
-
-        $alumni = Member::where('members.status', 'Active')
-            ->where('members.is_active', 1)
+        $alumni = Member::where('users.is_active', 1)->where('status', 'Active')
             ->leftJoin('users', 'users.id', '=', 'members.user_id')
             ->leftJoin('countries', 'countries.id', '=', 'members.country_id')
             ->leftJoin('states', 'states.id', '=', 'members.state_id')
             ->leftJoin('cities', 'cities.id', '=', 'members.city_id')
-            // like search member name department batch country state city
-            ->where('members.name', 'like', '%' . $text . '%')
-            ->orWhere('members.department', 'like', '%' . $text . '%')
-            ->orWhere('members.batch_no', 'like', '%' . $text . '%')
-            ->orWhere('countries.name', 'like', '%' . $text . '%')
-            ->orWhere('states.name', 'like', '%' . $text . '%')
-            ->orWhere('cities.name', 'like', '%' . $text . '%')
+            // // like search member name department batch country state city
+            ->when($text, function ($query, $text) {
+                return $query->where('members.name', 'like', '%' . $text . '%')
+                    ->orWhere('members.department', 'like', '%' . $text . '%')
+                    ->orWhere('members.batch_no', 'like', '%' . $text . '%')
+                    ->orWhere('countries.name', 'like', '%' . $text . '%')
+                    ->orWhere('states.name', 'like', '%' . $text . '%')
+                    ->orWhere('cities.name', 'like', '%' . $text . '%');
+            })
             ->select(
                 'members.*',
                 'countries.name as country_name',
                 'states.name as state_name',
                 'cities.name as city_name',
-                'users.image as user_image',
             )
             ->get();
 

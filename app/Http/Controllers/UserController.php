@@ -62,6 +62,7 @@ class UserController extends Controller
                     'contact_no' => $request->contact_no,
                     'password' => bcrypt($request->password),
                     'user_type' => $request->user_type ? $request->user_type : "Member",
+                    
                 ]);
                 if ($request->hasFile('image')) {
                     $createUser->update([
@@ -72,6 +73,7 @@ class UserController extends Controller
                 $member->update([
                     'user_id' => $createUser->id,
                     'image' => $createUser->image,
+                    'status' => 'Pending',
                 ]);
                 return $this->apiResponse([], 'Member Created', true, 200);
             } else {
@@ -107,6 +109,7 @@ class UserController extends Controller
                 $member->update([
                     'image' => $updateUser->image,
                     'is_active' => $request->is_active,
+                    'status' => $request->status,
                 ]);
                 return $this->apiResponse([], 'Member Updated', true, 200);
             }
@@ -125,6 +128,7 @@ class UserController extends Controller
                 'members.batch_no',
                 'members.date_of_birth',
                 'members.gender',
+                'members.status',
             )
             ->latest()
             ->get();

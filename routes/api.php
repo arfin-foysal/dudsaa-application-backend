@@ -1,32 +1,22 @@
 <?php
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\BloodController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\JobController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\UserController;
-use App\Models\Donation;
+
 
 // Auth Routes
 Route::post('/auth/register', [AuthController::class, 'registerUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
-
-// Mobile Open Routes
-Route::group(['prefix' => 'mobile'], function () {
-});
-
-// Website Open Routes
-Route::group(['prefix' => 'website'], function () {
-});
 
 Route::middleware('auth:sanctum')->group(function () {
     //Check Auth Routes
@@ -70,9 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('donation-list', [DonationController::class, 'donationList']);
         Route::get('delete-account', [AuthController::class, 'deleteUserAccount']);
     });
-    //Website Routes
-    Route::group(['prefix' => 'website'], function () {
-    });
+
     //Admin Routes
     Route::group(['prefix' => 'admin'], function () {
         Route::get('dashboard', [DashboardController::class, 'dashboard']);
@@ -97,7 +85,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('donation-save-or-update', [DonationController::class, 'donationSaveOrUpdate']);
         Route::get('donation-list', [DonationController::class, 'donationList']);
     });
+    //Website Routes
+    Route::group(['prefix' => 'website'], function () {
+    });
 });
+
 
 // open routes
 Route::group(['prefix' => 'open'], function () {

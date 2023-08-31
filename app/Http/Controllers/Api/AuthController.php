@@ -79,7 +79,7 @@ class AuthController extends Controller
                 'gender' => $request->gender,
                 'date_of_birth' => $request->date_of_birth,
                 'batch_no' => $request->batch_no,
-                'status' => "Active",
+                'status' => "Pending",
                 'is_active' => 0
             ]);
 

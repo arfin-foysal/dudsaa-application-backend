@@ -11,7 +11,7 @@ class Education_information extends Model
     protected $fillable = [
         'member_id',
         'standard',
-        'institute',
+        'institution',
         'result',
         'passing_year',
         'is_active',
