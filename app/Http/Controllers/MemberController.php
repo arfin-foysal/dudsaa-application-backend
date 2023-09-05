@@ -49,6 +49,10 @@ class MemberController extends Controller
             ->leftJoin('cities', 'cities.id', '=', 'members.city_id')
             ->select('members.*', 'users.image as user_image', 'countries.name as country_name', 'states.name as state_name', 'cities.name as city_name')
             ->first();
+            $alumni->service = Service_information::where('member_id',$alumni->user_id)
+            ->get();
+            $alumni->eduction= Education_information::where('member_id',$alumni->user_id)
+            ->get();
         return $this->apiResponse($alumni, 'Alumni Details', true, 200);
     }
 

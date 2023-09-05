@@ -275,7 +275,12 @@ class AuthController extends Controller
                 'twitter' => $request->twitter,
                 'instagram' => $request->instagram,
             ]);
-            return $this->apiResponse([], 'Update successfully', true, 200);
+            return $this->apiResponse(
+                $member,
+                'Update successfully',
+                true,
+                200
+            );
         } catch (\Throwable $th) {
             return $this->apiResponse([], $th->getMessage(), false, 500);
         }
@@ -291,6 +296,28 @@ class AuthController extends Controller
             ->select('members.*', 'users.image as image', 'countries.name as country_name', 'states.name as state_name', 'cities.name as city_name')
             ->first();
         return $this->apiResponse($user, 'User Profile', true, 200);
+    }
+
+    public function profileImageUpdate(Request $request)
+    {
+        $user = User::where('id', auth()->user()->id)->first();
+        if (request()->hasFile('image')) {
+            $user->update([
+                'image' => $this->imageUpload(
+                    $request,
+                    'image',
+                    'profile'
+                ),
+            ]);
+            $member = Member::where('user_id', auth()->user()->id)->first();
+            $member->update([
+                'image' => $user->image,
+            ]);
+        }
+
+        $image=$user->image;
+
+        return $this->apiResponse($image, 'Profile Image Updated', true, 200);
     }
 
 

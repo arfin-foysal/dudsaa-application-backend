@@ -6,6 +6,8 @@ use App\Http\Traits\HelperTrait;
 use App\Models\Event;
 use App\Models\EventPhoto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
 class EventController extends Controller
 {
     use HelperTrait;
@@ -98,10 +100,20 @@ class EventController extends Controller
     public function eventPhotoSaveOrUpdate(Request $request)
     {
         try {
+
+            $validator = Validator::make($request->all(), [
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->apiResponse([], $validator->errors()->first(), false, 403);
+            }
+
             $event = [
                 'event_id' => $request->event_id,
                 'is_active' => $request->is_active,
             ];
+
 
             if (empty($request->id)) {
                 $event['image'] = $this->imageUpload($request, 'image', 'event');

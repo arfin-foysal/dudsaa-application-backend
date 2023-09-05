@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     //Mobile Routes
     Route::group(['prefix' => 'mobile'], function () {
+        Route::get('summery',[DashboardController::class,'mobileDashboard']);
         Route::get('event-list', [EventController::class, 'eventList']);
         Route::get('event-details/{id}', [EventController::class, 'eventDetails']);
         Route::get('notice-list', [NoticeController::class, 'noticeList']);
@@ -59,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('password-change', [AuthController::class, 'passwordChange']);
         Route::get('donation-list', [DonationController::class, 'donationList']);
         Route::get('delete-account', [AuthController::class, 'deleteUserAccount']);
+        Route::Post('profile-image-update', [AuthController::class, 'profileImageUpdate']);
     });
 
     //Admin Routes
